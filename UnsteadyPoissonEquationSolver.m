@@ -78,14 +78,14 @@ while((IT<=MIT)&&(errT>eps))
        %Calculate Errors
     errT=max(max(abs((T-Told))));
     error(IT)=errT;
-    fprintf(1,'IT=%i   Error=%2.6e\n',IT,errT);
+    fprintf(1,'IT=%i  Time-%2.6e  Error=%2.6e\n',IT,IT*Dt,errT);
     IT=IT+1;
 end
 if(errT<=eps)
     fprintf(1,'Converged in %i',IT);
 else
     disp('Maximum Iteration Number Reached');
-    plot(1:MIT,log10(error),'- r');
+    plot(1:IT,log10(error(1:IT)),'- r');
     xlabel('Iteration');
     ylabel('Log(error)');
     title('Convergence History');
@@ -95,7 +95,7 @@ end
 plot(1:IT,log10(error(1:IT)),'- r');
 xlabel('Iteration');
 ylabel('Log(error)');
-title('Temperature Surface');
+title('Convergence History');
 
 
 figure
@@ -104,9 +104,14 @@ text_handle = clabel(C1,h1,'manual');
 colorbar
 xlabel('x')
 ylabel('y')
+title(strcat('Temperature Contour @',num2str(IT*Dt)));
 drawnow
 
 figure
 surf(X,Y,T);
-title('Temperature Surface')
+title(strcat('Temperature Surface @',num2str(IT*Dt)));
+xlabel('x')
+ylabel('y')
+zlabel('Temperature')
+axis fill;
 
