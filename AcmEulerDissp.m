@@ -10,7 +10,7 @@ Ren=100; %Reynonld Number
 Beta=1.2; %Artifical comoressibilty coeffcient
 m=60 ; % No. of points along channel walls
 n=30 ; %No. of point along channel sides
-MIT=100000; %Maximum allowabe iteration
+MIT=10%0000; %Maximum allowabe iteration
 %Dt=.005; %time step
 CFL=0.25; %Courant Number
 eps=1e-4; %error
@@ -110,7 +110,7 @@ if(err(IT)<eps)
     fprintf(1,'Converged in %i Iterations\n',IT);
 else
     disp('Maximum Iteration Number Reached');
-    plot(1:IT,log10(error(1:IT)),'- r');
+    plot(1:IT,log10(err(1:IT)),'- r');
     xlabel('Iteration');
     ylabel('Log(error)');
     title('Convergence History');
