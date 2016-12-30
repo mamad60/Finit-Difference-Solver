@@ -26,9 +26,9 @@ alpha=0.00023; %Thermal diffusivity
 m=100;  % No. of points along Top & Bottom
 n=100 ; %No. of point along Left & Right sides
 IT=1;    %Current iteration No.
-MIT=20000; %Maximum allowabe iteration
+MIT=100000; %Maximum allowabe iteration
 Dt=0.22; %time step
-eps=1e-1; %error
+eps=1e-6; %error
 errT=1000; %Error in two con. time step
 %------------------------------------
 
@@ -61,7 +61,8 @@ end
 Told=T;
 error=zeros(1,MIT);
 %Begin Iteration
-while((IT<=MIT)&&(errT>eps))
+while((IT<MIT)&&(errT>eps))
+    IT=IT+1;
     %shift solution from old iteration
     Told=T;
     [T]=Bcs(n,m,T,T0,T1);
@@ -78,11 +79,10 @@ while((IT<=MIT)&&(errT>eps))
        %Calculate Errors
     errT=max(max(abs((T-Told))));
     error(IT)=errT;
-    fprintf(1,'IT=%i  Time-%2.6e  Error=%2.6e\n',IT,IT*Dt,errT);
-    IT=IT+1;
+    fprintf(1,'IT=%i  Time=%2.6e  Error=%2.6e\n',IT,IT*Dt,errT);
 end
-if(errT<=eps)
-    fprintf(1,'Converged in %i',IT);
+if(errT<eps)
+    fprintf(1,'Converged in %i Iterations',IT);
 else
     disp('Maximum Iteration Number Reached');
     plot(1:IT,log10(error(1:IT)),'- r');
