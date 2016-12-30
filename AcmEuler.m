@@ -1,6 +1,7 @@
 clc
 clear
-% Solves Unsteady Channnel Flow by Artificla Compressiblity Method
+% Solves Steady Channnel Flow by Artificla Compressiblity Method
+%BY Mohammad Aghakhani, 2012
 %-----------------Input-----------
 L=8;%Channel Lenght
 H=1;%Chnnel with
