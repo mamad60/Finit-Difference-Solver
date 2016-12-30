@@ -2,6 +2,7 @@ clc
 clear
 %This Calculates of Channel Flow with Artifical comoressibilty coeffcient
 %And Adds 4th order Dissipation to Equations
+%By Mohammad Aghakhani,2012
 %-----------------Input-----------
 L=8;%Channel Lenght
 H=1;%Chnnel with
@@ -10,11 +11,13 @@ Beta=1.2; %Artifical comoressibilty coeffcient
 m=60 ; % No. of points along channel walls
 n=30 ; %No. of point along channel sides
 MIT=100000; %Maximum allowabe iteration
- Dt=.005; %time step
-%CFL=0.1; %Courant Number
+%Dt=.005; %time step
+CFL=0.25; %Courant Number
 eps=1e-4; %error
 err=zeros(1,MIT);
 err(1)=1000; %Error in two con. time step
+epsx=0.005; %Dissipation Coeficient in X Direction
+epsy=0.005;  %Dissipation Coeficient in Y Direction 
 %------------------------------------
 
 %Coordinate of nodes
@@ -59,15 +62,14 @@ p0=0.001;
 %Initiate the solution
 [P,U,V]=initiate(n,m,p0,u0,v0);
 [P,U,V ] = Bcs( n,m,P,U,V );
-%Determine minimum allowabe time step size
-%Dt=CFL_Test(Beta,CFL,dL,dH,U,V);
+Dt=CFL_Test(Beta,CFL,dL,dH,U,V);
+fprintf(1,'Maximum Allowable Time Step=%2.6e\n',Dt);
+disp('Press any key')
+pause
 %Begin Iteration
-
-%disp('----------------------------------------------------------')
-%disp('   IT        err(IT)      errP        errU       errV')
 IT=1;
-while((IT<=MIT)&&(err(IT)>eps))
-   
+while((IT<MIT)&&(err(IT)>eps))
+    IT=IT+1;
     %shift solution from old iteration
     Pold=P;
     Uold=U;
@@ -86,9 +88,9 @@ while((IT<=MIT)&&(err(IT)>eps))
             [ RHSU ] = RHS_U(i,j,dL,dH,Ren,U,FU,GU);
             [ RHSV ] = RHS_V(i,j,dL,dH,Ren,V,FV,GV);
             %Add diissioation to RHS
-            RHSP=RHSP-(  DisspX( i,j,m,P)+ DisspY( i,j,n,P)  );
-            RHSU=RHSU-( DisspX( i,j,m,U)+ DisspY( i,j,n,U) );
-            RHSV=RHSV-( DisspX( i,j,m,V)+ DisspY( i,j,n,V)  );
+            RHSP=RHSP-(  DisspX( i,j,m,P,epsx)+ DisspY( i,j,n,P,epsy)  );
+            RHSU=RHSU-( DisspX( i,j,m,U,epsx)+ DisspY( i,j,n,U,epsy) );
+            RHSV=RHSV-( DisspX( i,j,m,V,epsx)+ DisspY( i,j,n,V,epsy)  );
             %Calculate Solution in new time step Using Explicit Euler
             [P(i,j)]=Euler(P(i,j),Dt,RHSP);
             [U(i,j)]=Euler(U(i,j),Dt,RHSU);
@@ -102,12 +104,17 @@ while((IT<=MIT)&&(err(IT)>eps))
     errV=max(max(abs((V-Vold))));
     erri=max(errU,errV);
     err(IT)=max(erri,errP);
-   
- IT=IT+1;
- err(IT)=err(IT-1);
- %[IT err(IT)  errP  errU  errV]
- %[IT err(IT)]
- fprintf(1,'IT=%i   Error=%2.6e\n',IT,err(IT));
+    fprintf(1,'IT=%i   Error=%2.6e\n',IT,err(IT));
+end
+if(err(IT)<eps)
+    fprintf(1,'Converged in %i Iterations\n',IT);
+else
+    disp('Maximum Iteration Number Reached');
+    plot(1:IT,log10(error(1:IT)),'- r');
+    xlabel('Iteration');
+    ylabel('Log(error)');
+    title('Convergence History');
+    return;
 end
 
 disp('****************************************************************')
@@ -160,6 +167,5 @@ title('Profiles of the U velocity across channel Section')
 
 figure
 quiver(X,Y,U*3,V*3)
-time=IT*Dt
 title('Velocity Vectors')
 
