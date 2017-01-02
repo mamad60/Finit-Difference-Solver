@@ -1,4 +1,4 @@
-function [ disspy ] = DisspY( i,j,n,Q )
+function [ disspy ] = DisspY( i,j,n,Q,epsy )
 %this function calculates diisspation Q in X direction for each point for
 %incommpresible flow
 % Set an intermediate component to zero if cell is cell adjucent to the
@@ -13,7 +13,6 @@ if (i==n-1)
 else
     qip2j=Q(i+2,j); 
 end
-epsy=.001; %diisipation coefficient
 
 disspy=epsy*( qim2j- 4*Q(i+1,j) + 6*Q(i,j)-4*Q(i-1,j)+ qip2j );
 

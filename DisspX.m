@@ -1,4 +1,4 @@
-function [ disspx ] = DisspX( i,j,m,Q )
+function [ disspx ] = DisspX( i,j,m,Q,epsx )
 %this function calculates diisspation Q in X direction for each point for
 %incommpresible flow
 % Set an intermediate component to zero if cell is cell adjucent to the
@@ -13,8 +13,6 @@ if (j==m-1)
 else
     qijp2=Q(i,j+2); 
 end
-epsx=.001; %diisipation coefficient
-
 disspx=epsx*( qijm2-4*Q(i,j+1) + 6*Q(i,j)-4*Q(i,j-1)+ qijp2 );
 
 end

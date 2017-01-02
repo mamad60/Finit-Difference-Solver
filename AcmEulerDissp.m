@@ -76,7 +76,6 @@ while((IT<MIT)&&(err(IT)>eps))
     Vold=V;
     %Apply bcs
     [P,U,V]=Bcs(n,m,P,U,V);
-
     %Compute Fluxes From initial values From P,V,T
     [FP,GP,FU,GU,FV,GV] = Flux(P,U,V,Beta);
     
@@ -105,6 +104,13 @@ while((IT<MIT)&&(err(IT)>eps))
     erri=max(errU,errV);
     err(IT)=max(erri,errP);
     fprintf(1,'IT=%i   Error=%2.6e\n',IT,err(IT));
+end
+
+if(err(IT-1)>1000)
+    fprintf(1,'Iterations Diverged\n');
+    fprintf(1,'Please Consider Change in Time Step Or other Parmeters and Run Code Again\n');
+    disp('Press any key')   
+    pause
 end
 if(err(IT)<eps)
     fprintf(1,'Converged in %i Iterations\n',IT);

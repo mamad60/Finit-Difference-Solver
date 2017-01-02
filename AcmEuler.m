@@ -1,6 +1,6 @@
 clc
 clear
-% Solves Steady Channnel Flow by Artificla Compressiblity Method
+%Solves Steady Channnel Flow by Artificial Compressiblity Method
 %BY Mohammad Aghakhani, 2012
 %-----------------Input-----------
 L=8;%Channel Lenght
@@ -100,6 +100,13 @@ while((IT<MIT)&&(err(IT)>eps))
     err(IT)=max(erri,errP);
     fprintf(1,'IT=%i   Error=%2.6e\n',IT,err(IT));
 end
+
+if(err(IT-1)>1000)
+    fprintf(1,'Iterations Diverged\n');
+    fprintf(1,'Please Consider Change in Time Step Or other Parmeters and Run the Code Again\n');
+    disp('Press any key')   
+    pause
+end
 if(err(IT)<eps)
     fprintf(1,'Converged in %i Iterations\n',IT);
 else
@@ -130,14 +137,17 @@ colorbar
 title('CONTOURES OF u(x,y)');
 xlabel('x(1:n)')
 ylabel('y(1:m)')
+axis fill
 
 figure
 surf(X,Y,P)
 title('Surface of Pressure')
+axis fill
 
 figure
 surf(X,Y,U)
 title('Surface of U(x Velocity)')
+axis fill
 
 
 figure
@@ -157,9 +167,15 @@ plot(U(1:n,8*m/10),Y(1:n,8*m/10),'- k')
 plot(U(1:n,m),Y(1:n,m),'-- r')
 legend('x=0','x=m/10','x=3*m/10','x=5*m/10','x=6*m/10','x=7*m/10','x=8*m/10','x=m',1)
 title('Profiles of the U velocity across channel Section')
+axis fill
+hold off;
 
 figure
 quiver(X,Y,U*5,V*5)
-time=IT*Dt
+time=IT*Dt;
+axis fill;
 title('Velocity Vectors')
+streamline(X,Y,U,V,0,0);
+title('Stream Lime Plot')
+
 

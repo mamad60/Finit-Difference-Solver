@@ -3,6 +3,7 @@ clear
 %Solves Channel FLow by Artifical comoressibilty coeffcient 
 %and 4th Order Rung-Kutta Method
 %And Adds Numerical Dissipation
+%By Mohammad Aghakhani,2012
 %-----------------Input-----------
 L=8;%Channel Lenght
 H=1;%Chnnel with
@@ -11,11 +12,13 @@ Beta=1.2; %Artifical comoressibilty coeffcient
 m=60 ; % No. of points along channel walls
 n=30 ; %No. of point along channel sides
 MIT=100000; %Maximum allowabe iteration
-Dt=.005; %time step
-%CFL=0.1; %Courant Number
+%Dt=.005; %time step
+CFL=0.25; %Courant Number
 eps=1e-4; %error
 err=zeros(1,MIT);
 err(1)=1000; %Error in two con. time step
+epsx=0.005; %Dissipation Coeficient in X Direction
+epsy=0.005;  %Dissipation Coeficient in Y Direction 
 %------------------------------------
 
 %Coordinate of nodes
@@ -61,14 +64,14 @@ p0=0.001;
 [P,U,V]=initiate(n,m,p0,u0,v0);
 [P,U,V ] = Bcs( n,m,P,U,V );
 %Determine minimum allowabe time step size
-%Dt=CFL_Test(Beta,CFL,dL,dH,U,V);
+Dt=CFL_Test(Beta,CFL,dL,dH,U,V);
 %Begin Iteration
-
-%disp('----------------------------------------------------------')
-%disp('   IT        err(IT)      errP        errU       errV')
+fprintf(1,'Maximum Allowable Time Step=%2.6e\n',Dt);
+disp('Press any key')
+pause
 IT=1;
-while((IT<=MIT)&&(err(IT)>eps))
-   
+while((IT<MIT)&&(err(IT)>eps))
+    IT=IT+1;
     %Shift solution from old iteration U(0) of Rung-kutta
     Pold=P;
     Uold=U;
@@ -76,7 +79,6 @@ while((IT<=MIT)&&(err(IT)>eps))
     %Apply Bcs
     [P,U,V]=Bcs(n,m,P,U,V);
  [FP,GP,FU,GU,FV,GV] = Flux(P,U,V,Beta);
-
         
     %4th Oreder Rung-Kutta Method
     for i=2:n-1
@@ -87,9 +89,9 @@ while((IT<=MIT)&&(err(IT)>eps))
             [ RHSVA ] = RHS_V(i,j,dL,dH,Ren,V,FV,GV);
             [ RHSPA ] = RHS_P(i,j,dL,dH,FP,GP);
             %Add diissioation to RHS  P(0)
-            RHSUA=RHSUA-( DisspX( i,j,m,U)+ DisspY( i,j,n,U) );
-            RHSVA=RHSVA-( DisspX( i,j,m,V)+ DisspY( i,j,n,V)  );
-            RHSPA=RHSPA-(  DisspX( i,j,m,P)+ DisspY( i,j,n,P)  );
+            RHSUA=RHSUA-( DisspX( i,j,m,U,epsx)+ DisspY( i,j,n,U,epsy) );
+            RHSVA=RHSVA-( DisspX( i,j,m,V,epsx)+ DisspY( i,j,n,V,epsy)  );
+            RHSPA=RHSPA-(  DisspX( i,j,m,P,epsx)+ DisspY( i,j,n,P,epsy)  );
             %Calculate Solution in new time step U(1)
             U(i,j)=Uold(i,j)+RHSUA*Dt/2;
             V(i,j)=Vold(i,j)+RHSVA*Dt/2;
@@ -102,9 +104,9 @@ while((IT<=MIT)&&(err(IT)>eps))
             [ RHSVB ] = RHS_V(i,j,dL,dH,Ren,V,FV,GV);
             [ RHSPB ] = RHS_P(i,j,dL,dH,FP,GP);  % PU(1)
             %Add diissioation to RHS
-            RHSUB=RHSUB-( DisspX( i,j,m,U)+ DisspY( i,j,n,U) );
-            RHSVB=RHSVB-( DisspX( i,j,m,V)+ DisspY( i,j,n,V)  );
-            RHSPB=RHSPB-(  DisspX( i,j,m,P)+ DisspY( i,j,n,P)  );
+            RHSUB=RHSUB-( DisspX( i,j,m,U,epsx)+ DisspY( i,j,n,U,epsy) );
+            RHSVB=RHSVB-( DisspX( i,j,m,V,epsx)+ DisspY( i,j,n,V,epsy)  );
+            RHSPB=RHSPB-(  DisspX( i,j,m,P,epsx)+ DisspY( i,j,n,P,epsy)  );
             %Calculate Solution in new time step
             U(i,j)=Uold(i,j)+RHSUB*Dt/2;
             V(i,j)=Vold(i,j)+RHSVB*Dt/2;
@@ -116,9 +118,9 @@ while((IT<=MIT)&&(err(IT)>eps))
             [ RHSVC ] = RHS_V(i,j,dL,dH,Ren,V,FV,GV);
             [ RHSPC ] = RHS_P(i,j,dL,dH,FP,GP);  % PU(2)
             %Add diissioation to RHS
-            RHSUC=RHSUC-( DisspX( i,j,m,U)+ DisspY( i,j,n,U) );
-            RHSVC=RHSVC-( DisspX( i,j,m,V)+ DisspY( i,j,n,V)  );
-            RHSPC=RHSPC-(  DisspX( i,j,m,P)+ DisspY( i,j,n,P)  );
+            RHSUC=RHSUC-( DisspX( i,j,m,U,epsx)+ DisspY( i,j,n,U,epsy) );
+            RHSVC=RHSVC-( DisspX( i,j,m,V,epsx)+ DisspY( i,j,n,V,epsy)  );
+            RHSPC=RHSPC-(  DisspX( i,j,m,P,epsx)+ DisspY( i,j,n,P,epsy)  );
             %Calculate Solution in new time step
             U(i,j)=Uold(i,j)+RHSUC*Dt;
             V(i,j)=Vold(i,j)+RHSVC*Dt;
@@ -130,9 +132,9 @@ while((IT<=MIT)&&(err(IT)>eps))
             [ RHSUD ] = RHS_U(i,j,dL,dH,Ren,U,FU,GU);
             [ RHSVD ] = RHS_V(i,j,dL,dH,Ren,V,FV,GV); 
             %Add diissioation to RHS
-            RHSUD=RHSUD-( DisspX( i,j,m,U)+ DisspY( i,j,n,U) );
-            RHSVD=RHSVD-( DisspX( i,j,m,V)+ DisspY( i,j,n,V)  );
-            RHSPD=RHSPD-(  DisspX( i,j,m,P)+ DisspY( i,j,n,P)  );
+            RHSUD=RHSUD-( DisspX( i,j,m,U,epsx)+ DisspY( i,j,n,U,epsy) );
+            RHSVD=RHSVD-( DisspX( i,j,m,V,epsx)+ DisspY( i,j,n,V,epsy)  );
+            RHSPD=RHSPD-(  DisspX( i,j,m,P,epsx)+ DisspY( i,j,n,P,epsy)  );
 
 %                %U(4) New Time Step Calculations
             U(i,j)=Uold(i,j)+(RHSUA+2*RHSUB+2*RHSUC+RHSUD)*Dt/6;   
@@ -151,13 +153,26 @@ while((IT<=MIT)&&(err(IT)>eps))
     errV=max(max(abs((V-Vold))));
     erri=max(errU,errV);
     err(IT)=max(erri,errP);
-   
- IT=IT+1;
- err(IT)=err(IT-1);
- %[IT err(IT)  errP  errU  errV]
- %[IT err(IT)]
- fprintf(1,'IT=%i   Error=%2.6e\n',IT,err(IT));
+    fprintf(1,'IT=%i   Error=%2.6e\n',IT,err(IT));
 end
+ 
+if(err(IT-1)>1000)
+    fprintf(1,'Iterations Diverged\n');
+    fprintf(1,'Please Consider Change in Time Step Or other Parmeters and Run Code Again\n');
+    disp('Press any key')   
+    pause
+end
+if(err(IT)<eps)
+    fprintf(1,'Converged in %i Iterations\n',IT);
+else
+    disp('Maximum Iteration Number Reached');
+    plot(1:IT,log10(err(1:IT)),'- r');
+    xlabel('Iteration');
+    ylabel('Log(error)');
+    title('Convergence History');
+    return;
+end
+
 disp('****************************************************************')
 fprintf(1,'Beta=%2.2f       IT=%u       Dt=%2.2e        IT*Dt=%2.2f    Beta*Dt=%2.5f\n ',Beta, IT, Dt, IT*Dt, Beta*Dt);
 disp('Press any key')
@@ -208,6 +223,5 @@ title('Profiles of the U velocity across channel Section')
 
 figure
 quiver(X,Y,U*3,V*3)
-time=IT*Dt
 title('Velocity Vectors')
 
